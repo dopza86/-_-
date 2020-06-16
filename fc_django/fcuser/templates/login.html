@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+<!-- base.html 에서 상속받아옴 -->
+
+{% block contents %}
+<!-- base.html 의 block contents 자리에 들어갈 html -->
+<div class="row mt-5">
+    <div class="col-12 text-center">
+        <h1>로그인</h1>
+    </div>
+</div>
+<div class="row mt-5">
+    <div class="col-12">
+        <!-- views 에서 에러메시지 받아옴 -->
+        {{ error }}
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <form method="POST" action=".">
+            {% csrf_token %}
+            {% for field in form %}
+            <div class="form-group">
+                <label for="{{field.id_for_label}}">{{field.label}}</label>
+                <input type="{{field.field.widget.input_type}}" class="form-control" id="{{field.id_for_label}}"
+                    placeholder="{{field.label}}" name="{{field.name}}" />
+            </div>
+            {%if field.errors%}
+            <span style="color: red">{{field.errors}}</span>
+            {% endif %}
+            {% endfor %}
+            <!-- {{ form }} -->
+            <!-- {{ form.as_p }} -->
+
+            <button type="submit" class="btn btn-primary">로그인</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
