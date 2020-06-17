@@ -3,19 +3,40 @@ from django.views.generic.edit import FormView
 from django.views.generic import ListView
 from django.utils.decorators import method_decorator
 from fcuser.decorators import login_required
+from django.db import transaction
 from .forms import RegisterForm
 from .models import Order
+from product.models import Product
+from fcuser.models import Fcuser
+
 
 # Create your views here.
 
 
+@method_decorator(login_required, name="dispatch")
 class OrderCreate(FormView):
 
     form_class = RegisterForm
     success_url = "/product/"
 
+    def form_valid(self, form):
+        with transaction.atomic():  # with 문 사용시 내부적으로 __enter__(), __exit__() 가 구현이 되어 있다.
+            prod = Product.objects.get(pk=form.data.get("product"))
+            order = Order(
+                quantity=form.data.get("quantity"),
+                product=prod,  # 상품 아이디를 가져옴
+                fcuser=Fcuser.objects.get(
+                    email=self.request.session.get("user")
+                ),  # 세션에 있는 이메일을 가져와서 모델을 가져옴
+            )
+            order.save()
+            prod.stock -= int(form.data.get("quantity"))
+            prod.save()
+        # 이안에서 일어나는 db 관련 일들은 모두 트랜젝션으로 처리된다
+        return super().form_valid(form)
+
     def form_invalid(self, form):
-        return redirect("/product/" + str(form.product))
+        return redirect("/product/" + str(form.data.get("product")))
         # form에 빠진 부분 , 즉 장석하지 않은 부분이 있을때 해당상품으로 리다이렉트 된다
         # 템플릿 이름을 지정하지않아 에러가 발생했을때 처리하는 함수
 

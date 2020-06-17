@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
+from django.contrib.auth.hashers import make_password
+from .models import Fcuser
 from .forms import RegisterForm, LoginForm
 
 # Create your views here.
@@ -11,11 +13,17 @@ class RegisterView(FormView):
     template_name = "register.html"
     form_class = RegisterForm
     success_url = "/"
-    # 폼뷰를 사용하지 않을경우
 
-    # if request.method =="POST"
-    #     form = RegisterForm(request.POST)
-    # 등을 이용하여  폼을 호출해야한다
+    def form_valid(self, form):
+        fcuser = Fcuser(
+            email=form.data.get("email"),  # 폼에서 데이터를 직접 받아온다
+            password=make_password(form.data.get("password"), level="user"),
+        )
+        fcuser.save()
+
+        # 유효성 검사를 뷰에서 직접 하고 모델에 저장까지 한다
+
+        return super().form_valid(form)
 
 
 class LoginView(FormView):
@@ -24,7 +32,7 @@ class LoginView(FormView):
     success_url = "/"
 
     def form_valid(self, form):
-        self.request.session["user"] = form.email
+        self.request.session["user"] = form.data.get("email")  # 폼에서 데이터를 직접 받아온다
         return super().form_valid(form)
 
 

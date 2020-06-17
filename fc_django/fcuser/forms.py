@@ -5,18 +5,12 @@ from django.contrib.auth.hashers import check_password, make_password
 
 class RegisterForm(forms.Form):
 
-    email = forms.EmailField(
-        error_messages={"required": "이메일을 입력하세요"}, max_length=256, label="이메일"
-    )
+    email = forms.EmailField(error_messages={"required": "이메일을 입력하세요"}, max_length=256, label="이메일")
     password = forms.CharField(
-        error_messages={"required": "비밀번호를 입력하세요"},
-        widget=forms.PasswordInput,
-        label="비밀번호",
+        error_messages={"required": "비밀번호를 입력하세요"}, widget=forms.PasswordInput, label="비밀번호",
     )
     re_password = forms.CharField(
-        error_messages={"required": "비밀번호를 입력하세요"},
-        widget=forms.PasswordInput,
-        label="비밀번호 확인",
+        error_messages={"required": "비밀번호를 입력하세요"}, widget=forms.PasswordInput, label="비밀번호 확인",
     )
 
     def clean(self):
@@ -28,20 +22,13 @@ class RegisterForm(forms.Form):
             if password != re_password:
                 self.add_error("password", "비밀번호가 서로 다릅니다")
                 self.add_error("re_password", "비밀번호가 서로 다릅니다")
-            else:
-                fcuser = Fcuser(email=email, password=make_password(password))
-                fcuser.save()
 
 
 class LoginForm(forms.Form):
 
-    email = forms.EmailField(
-        error_messages={"required": "이메일을 입력하세요"}, max_length=256, label="이메일"
-    )
+    email = forms.EmailField(error_messages={"required": "이메일을 입력하세요"}, max_length=256, label="이메일")
     password = forms.CharField(
-        error_messages={"required": "비밀번호를 입력하세요"},
-        widget=forms.PasswordInput,
-        label="비밀번호",
+        error_messages={"required": "비밀번호를 입력하세요"}, widget=forms.PasswordInput, label="비밀번호",
     )
 
     def clean(self):
@@ -58,5 +45,3 @@ class LoginForm(forms.Form):
                 return
             if not check_password(password, fcuser.password):
                 self.add_error("password", "비밀번호를 틀렸습니다")  # 특정 필드에 에러를 넣는 함수
-            else:
-                self.email = fcuser.email
